@@ -2,11 +2,8 @@ import argparse
 import os
 import sys
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
+from dotenv import load_dotenv
+load_dotenv()
 
 # Inject src folder into python path for importing modules cleanly
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
