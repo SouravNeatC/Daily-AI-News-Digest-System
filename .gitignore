@@ -1,0 +1,20 @@
+# Environment Variables (sensitive data)
+.env
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local test outputs
+digest_preview.html
+
+# OS metadata
+.DS_Store
+Thumbs.db
