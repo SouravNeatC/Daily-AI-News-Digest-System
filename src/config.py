@@ -1,7 +1,6 @@
 import os
 
 # Gemini API Configuration
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = "gemini-2.5-flash"
 
 def get_env(name, default=None):
@@ -17,6 +16,7 @@ def get_int_env(name, default):
     except:
         return default
 
+GEMINI_API_KEY = get_env("GEMINI_API_KEY", "")
 
 # SMTP Configuration
 SMTP_SERVER = get_env("SMTP_SERVER", "smtp.gmail.com")
