@@ -4,13 +4,26 @@ import os
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODEL = "gemini-2.5-flash"
 
-# SMTP Configuration
-SMTP_SERVER = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
-SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("SMTP_USER", "")
-SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
-TO_EMAIL = os.environ.get("TO_EMAIL", "")
+def get_env(name, default=None):
+    value = os.environ.get(name)
+    if value is None or str(value).strip() == "":
+        return default
+    return value
 
+def get_int_env(name, default):
+    value = get_env(name)
+    try:
+        return int(value)
+    except:
+        return default
+
+
+# SMTP Configuration
+SMTP_SERVER = get_env("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = get_int_env("SMTP_PORT", 587)
+SMTP_USER = get_env("SMTP_USER", "")
+SMTP_PASSWORD = get_env("SMTP_PASSWORD", "")
+TO_EMAIL = get_env("TO_EMAIL", "")
 # News Feeds Sources (RSS and Fallback Page URLs)
 RSS_FEEDS = {
     "OpenAI Blog": "https://openai.com/news/rss.xml",
