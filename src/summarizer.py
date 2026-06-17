@@ -2,6 +2,8 @@ import json
 import requests
 from config import GEMINI_API_KEY, GEMINI_MODEL
 from utils import logger
+from dotenv import load_dotenv
+load_dotenv()
 
 def summarize_news(clustered_articles: dict) -> dict:
     """Sends all clustered articles to Gemini 2.5 Flash in a single API call to generate a structured JSON digest.
