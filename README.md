@@ -1,4 +1,4 @@
-# Daily AI News Digest System ⚡📰
+# Daily AI News Digest System
 
 A production-quality, lightweight, and highly optimized automated system to fetch, filter, cluster, summarize, and deliver daily AI news updates straight to your inbox. 
 
@@ -6,7 +6,7 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
 
 ---
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```text
 /ai-news-reporter
@@ -27,7 +27,7 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
 
 ---
 
-## ⚡ Key Optimizations & Features
+## Key Optimizations & Features
 
 - **Personalized Reader Profile:** Tailor the daily news coverage using `USER_PERSONA` in `src/config.py` to instruct Gemini to prioritize, filter, and summarize articles matching your specific tech interests.
 - **Dynamic HTML news scraping:** Iterates dynamically over any arbitrary news portal added to `HTML_SOURCES` in `config.py` using a single generic HTML news scraper.
@@ -39,7 +39,7 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
 
 ---
 
-## ⚙️ Setup & Configuration
+## Setup & Configuration
 
 ### 1. Local Setup
 
@@ -77,7 +77,7 @@ To automate the daily runs, push the repository to GitHub and add the following 
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### Run Dry Run (With Live Fetching & Gemini)
 To fetch actual news and call the Gemini API without dispatching an email:
