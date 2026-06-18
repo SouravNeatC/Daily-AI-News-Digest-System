@@ -13,13 +13,13 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
   ├── .github/workflows/
   │     └── daily.yml          # GitHub Actions workflow (runs daily at 8:00 AM UTC)
   ├── src/
-  │     ├── config.py          # News sources, Gemini model configuration, and filters
+  │     ├── config.py          # News sources, Gemini model config, negative filters, and user persona
   │     ├── utils.py           # Structured logger and date utilities
-  │     ├── news_fetcher.py    # RSS parsing & BeautifulSoup fallback crawlers
+  │     ├── news_fetcher.py    # RSS parsing & dynamic generic HTML scrapers
   │     ├── filter.py          # Title normalization, deduplication, and keyword filtration
   │     ├── cluster.py         # Embedding-free deterministic topic clustering
-  │     ├── summarizer.py      # Batched single-pass Gemini 2.5 Flash client
-  │     └── emailer.py         # SMTP email formatter (premium modern CSS design)
+  │     ├── summarizer.py      # Resilient, persona-tailored single-pass Gemini client
+  │     └── emailer.py         # SMTP email formatter (premium newspaper HTML design)
   ├── main.py                  # Entrypoint orchestrator
   ├── requirements.txt         # Minimal dependency definitions
   └── README.md                # System documentation
@@ -27,10 +27,13 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
 
 ---
 
-## ⚡ Key Optimizations
+## ⚡ Key Optimizations & Features
 
+- **Personalized Reader Profile:** Tailor the daily news coverage using `USER_PERSONA` in `src/config.py` to instruct Gemini to prioritize, filter, and summarize articles matching your specific tech interests.
+- **Dynamic HTML news scraping:** Iterates dynamically over any arbitrary news portal added to `HTML_SOURCES` in `config.py` using a single generic HTML news scraper.
+- **API Resilience (Auto-Retry):** Automatically retries Gemini API requests up to 4 times with exponential backoff if a transient error (such as HTTP `503` or rate limit `429`) is encountered.
 - **Single-Pass Summarization:** Packages all clustered articles into a single prompt for Gemini 2.5 Flash, reducing the LLM execution footprint to **exactly 1 call per run**.
-- **No Browser Automation:** Uses lightweight `requests` and XML parsers to extract feeds, bringing ingestion times down to milliseconds.
+- **No Browser Automation:** Uses lightweight `requests` and XML/HTML parsing (BeautifulSoup) to extract feeds, bringing ingestion times down to milliseconds.
 - **Embedding-Free Clustering:** Clusters topics deterministically using rule-based term-matching to bypass costly vector database integrations and embedding calls.
 - **Fast Startup:** Only requires two lightweight dependencies (`requests`, `beautifulsoup4`), yielding extremely fast workflow initialization in GitHub Actions.
 
@@ -38,7 +41,7 @@ It is designed specifically for **maximum runtime efficiency, zero browser autom
 
 ## ⚙️ Setup & Configuration
 
-### 1. Local Configuration
+### 1. Local Setup
 
 Ensure you have Python 3.9+ installed. Install the dependencies:
 
@@ -56,6 +59,8 @@ export SMTP_USER="your-email@gmail.com"
 export SMTP_PASSWORD="your-smtp-app-password"
 export TO_EMAIL="recipient-email@gmail.com"
 ```
+
+Configure your RSS feeds, dynamic HTML portals, and personalized interests in `src/config.py` using `RSS_FEEDS`, `HTML_SOURCES`, and `USER_PERSONA`.
 
 ### 2. GitHub Secrets
 
@@ -79,7 +84,7 @@ To fetch actual news and call the Gemini API without dispatching an email:
 ```bash
 python3 main.py --dry-run
 ```
-This writes the generated email content to `./digest_preview.html` and prints highlights to the log console.
+This writes the generated HTML digest newsletter preview to `./digest_preview.html` and prints highlights to the log console.
 
 ### Full Execution (With Email Delivery)
 ```bash

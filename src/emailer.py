@@ -164,7 +164,7 @@ def generate_html_email(summary_data: dict) -> str:
             {clusters_html}
             
             <footer>
-                <p>Automated Daily Digest System &bull; Powered by Gemini 2.5 Flash</p>
+                <p>Automated Daily Digest System &bull; Powered by AI</p>
             </footer>
         </div>
     </body>
