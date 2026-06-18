@@ -33,6 +33,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Verify Required Environment Variables
+        shell: bash
         run: |
           echo "Length of GEMINI_API_KEY: ${#GEMINI_API_KEY}"
 
