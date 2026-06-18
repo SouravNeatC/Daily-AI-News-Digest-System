@@ -1,73 +1,41 @@
 name: Daily AI News Digest
-
+ 
 on:
   schedule:
     - cron: '0 2 * * *'
   workflow_dispatch:
-
+ 
 jobs:
   run-digest:
     runs-on: ubuntu-latest
-
-    env:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-      SMTP_PORT: ${{ secrets.SMTP_PORT }}
-      SMTP_USER: ${{ secrets.SMTP_USER }}
-      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-      TO_EMAIL: ${{ secrets.TO_EMAIL }}
-
+ 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@v5
+ 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
-
+ 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Verify Required Environment Variables
-        shell: bash
+ 
+      - name: Verify Environment
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           echo "Length of GEMINI_API_KEY: ${#GEMINI_API_KEY}"
-
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "ERROR: GEMINI_API_KEY is not set"
-            exit 1
-          fi
-
-          if [ -z "$SMTP_SERVER" ]; then
-            echo "ERROR: SMTP_SERVER is not set"
-            exit 1
-          fi
-
-          if [ -z "$SMTP_PORT" ]; then
-            echo "ERROR: SMTP_PORT is not set"
-            exit 1
-          fi
-
-          if [ -z "$SMTP_USER" ]; then
-            echo "ERROR: SMTP_USER is not set"
-            exit 1
-          fi
-
-          if [ -z "$SMTP_PASSWORD" ]; then
-            echo "ERROR: SMTP_PASSWORD is not set"
-            exit 1
-          fi
-
-          if [ -z "$TO_EMAIL" ]; then
-            echo "ERROR: TO_EMAIL is not set"
-            exit 1
-          fi
-
-          echo "All required secrets are available."
-
+ 
       - name: Run Digest System
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
         run: python main.py
