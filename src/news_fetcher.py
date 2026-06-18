@@ -99,115 +99,111 @@ def fetch_rss_sources() -> list:
             
     return all_articles
 
-def fetch_anthropic_news() -> list:
-    """Parses Anthropic newsroom HTML and returns extracted articles."""
+def fetch_generic_html(name: str, config: dict) -> list:
+    """Scrapes news articles from any HTML news/blog page dynamically by extracting links, titles, and nearby dates."""
+    url = config.get("url")
+    if not url:
+        return []
+        
+    logger.info(f"Scraping dynamic HTML source '{name}': {url}")
     articles = []
-    config = HTML_SOURCES["Anthropic News"]
-    url = config["url"]
-    
-    logger.info(f"Scraping Anthropic News: {url}")
     try:
         response = requests.get(url, headers=HEADERS, timeout=15)
         if response.status_code != 200:
-            logger.warning(f"Failed to fetch Anthropic News: HTTP {response.status_code}")
+            logger.warning(f"Failed to fetch HTML source {name}: HTTP {response.status_code}")
             return articles
             
         soup = BeautifulSoup(response.text, "html.parser")
+        parsed_url = urllib.parse.urlparse(url)
+        base_domain = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        
+        # Look for links
         for a_tag in soup.find_all("a", href=True):
             href = a_tag["href"]
-            if href.startswith("/news/") and href != "/news":
-                title_text = ""
-                title_el = a_tag.find(["h2", "h3", "h4"])
-                if title_el:
-                    title_text = title_el.get_text()
-                else:
-                    title_text = a_tag.get_text()
+            if not href or href.startswith("#") or href.startswith("javascript:") or href.startswith("mailto:") or href.startswith("tel:"):
+                continue
                 
-                title_text = title_text.strip()
-                if not title_text or len(title_text) < 10:
-                    continue
-                    
-                full_url = urllib.parse.urljoin("https://www.anthropic.com", href)
+            # Filter obvious noise
+            lower_href = href.lower()
+            exclude_keywords = [
+                "/tag/", "/category/", "/author/", "/legal/", "/privacy/", "/terms/", 
+                "/about", "/contact", "/careers", "/search", "/login", "/signup", "/subscribe",
+                "twitter.com", "facebook.com", "linkedin.com", "github.com", "instagram.com"
+            ]
+            if any(kw in lower_href for kw in exclude_keywords):
+                continue
                 
-                date_str = ""
-                parent = a_tag.parent
-                for _ in range(3):
-                    if parent is None:
-                        break
-                    text = parent.get_text()
-                    match = re.search(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b', text)
-                    if match:
-                        date_str = match.group(0)
-                        break
-                    parent = parent.parent
-                
-                articles.append({
-                    "title": title_text,
-                    "link": full_url,
-                    "snippet": "",
-                    "pub_date_str": date_str,
-                    "source": "Anthropic News"
-                })
-    except Exception as e:
-        logger.error(f"Error scraping Anthropic News: {e}")
-        
-    return articles
-
-def fetch_deepmind_blog() -> list:
-    """Parses Google DeepMind blog HTML and returns extracted articles."""
-    articles = []
-    config = HTML_SOURCES["Google DeepMind"]
-    url = config["url"]
-    
-    logger.info(f"Scraping Google DeepMind Blog: {url}")
-    try:
-        response = requests.get(url, headers=HEADERS, timeout=15)
-        if response.status_code != 200:
-            logger.warning(f"Failed to fetch DeepMind Blog: HTTP {response.status_code}")
-            return articles
+            # Resolve to absolute URL
+            full_url = urllib.parse.urljoin(url, href)
             
-        soup = BeautifulSoup(response.text, "html.parser")
-        for a_tag in soup.find_all("a", href=True):
-            href = a_tag["href"]
-            if href.startswith("/blog/") and href != "/blog/":
-                title_text = ""
-                title_el = a_tag.find(["h2", "h3", "h4", "div", "span"])
-                if title_el:
-                    title_text = title_el.get_text()
-                else:
-                    title_text = a_tag.get_text()
+            # Restrict to the same domain/subdomain
+            parsed_full = urllib.parse.urlparse(full_url)
+            if parsed_full.netloc != parsed_url.netloc and not parsed_full.netloc.endswith("." + parsed_url.netloc.split(".")[-2] + "." + parsed_url.netloc.split(".")[-1]):
+                continue
                 
-                title_text = title_text.strip()
-                if not title_text or len(title_text) < 10 or "navigation" in title_text.lower():
-                    continue
-                    
-                full_url = urllib.parse.urljoin("https://deepmind.google", href)
+            # Get the title text
+            title_text = ""
+            header_el = a_tag.find(["h1", "h2", "h3", "h4", "h5", "h6", "div", "span"])
+            if header_el:
+                title_text = header_el.get_text()
+            else:
+                title_text = a_tag.get_text()
                 
-                date_str = ""
-                parent = a_tag.parent
-                for _ in range(3):
-                    if parent is None:
-                        break
-                    text = parent.get_text()
-                    match = re.search(r'\b\d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b', text)
-                    if not match:
-                        match = re.search(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}, \d{4}\b', text)
-                    if match:
-                        date_str = match.group(0)
-                        break
-                    parent = parent.parent
-
-                articles.append({
-                    "title": title_text,
-                    "link": full_url,
-                    "snippet": "",
-                    "pub_date_str": date_str,
-                    "source": "Google DeepMind"
-                })
+            title_text = re.sub(r'\s+', ' ', title_text).strip()
+            # Title should be a reasonable length for a news headline
+            if not title_text or len(title_text) < 12 or len(title_text) > 200:
+                continue
+                
+            # Skip common generic button texts
+            lower_title = title_text.lower()
+            boilerplate = ["read more", "learn more", "subscribe", "newsletter", "terms", "privacy", "about us", "contact", "careers", "search", "menu", "sign in", "sign up", "all posts", "back to top"]
+            if any(bp in lower_title for bp in boilerplate):
+                continue
+                
+            # Scan nearby text in parent/ancestors for dates
+            date_str = ""
+            parent = a_tag.parent
+            for _ in range(4):
+                if parent is None:
+                    break
+                text = parent.get_text()
+                # 1. "June 18, 2026" or "Jun 18, 2026"
+                m1 = re.search(r'\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4}\b', text, re.IGNORECASE)
+                if m1:
+                    date_str = m1.group(0)
+                    break
+                # 2. "18 June 2026" or "18 Jun 2026"
+                m2 = re.search(r'\b\d{1,2} (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{4}\b', text, re.IGNORECASE)
+                if m2:
+                    date_str = m2.group(0)
+                    break
+                # 3. ISO format "YYYY-MM-DD"
+                m3 = re.search(r'\b\d{4}[-/]\d{2}[-/]\d{2}\b', text)
+                if m3:
+                    date_str = m3.group(0)
+                    break
+                parent = parent.parent
+                
+            articles.append({
+                "title": title_text,
+                "link": full_url,
+                "snippet": "",
+                "pub_date_str": date_str,
+                "source": name
+            })
     except Exception as e:
-        logger.error(f"Error scraping DeepMind Blog: {e}")
+        logger.error(f"Error scraping HTML source '{name}': {e}")
         
-    return articles
+    # Deduplicate articles based on link
+    unique_articles = []
+    seen = set()
+    for art in articles:
+        if art["link"] not in seen:
+            seen.add(art["link"])
+            unique_articles.append(art)
+            
+    logger.info(f"Scraped {len(unique_articles)} articles from '{name}'")
+    return unique_articles
 
 def filter_last_24_hours(articles: list) -> list:
     """Filters articles to include only those published in the last 24 hours."""
@@ -235,9 +231,11 @@ def fetch_all_news() -> list:
     """Main function to gather all raw news articles from all sources and filter to last 24h."""
     articles = []
     articles.extend(fetch_rss_sources())
-    articles.extend(fetch_anthropic_news())
-    articles.extend(fetch_deepmind_blog())
     
+    # Dynamically iterate over all HTML sources defined in config.py
+    for name, config in HTML_SOURCES.items():
+        articles.extend(fetch_generic_html(name, config))
+        
     recent_articles = filter_last_24_hours(articles)
     logger.info(f"Total raw articles fetched: {len(articles)}. After 24h filter: {len(recent_articles)}")
     return recent_articles

@@ -5,7 +5,7 @@ from config import SMTP_SERVER, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, TO_EMAIL
 from utils import logger, get_current_utc_date
 
 def generate_html_email(summary_data: dict) -> str:
-    """Generates a premium, highly aesthetic HTML email from the structured digest data."""
+    """Generates a premium, highly professional news portal styled HTML email from the structured digest data."""
     today = get_current_utc_date()
     
     highlights_html = ""
@@ -25,17 +25,17 @@ def generate_html_email(summary_data: dict) -> str:
             summary = item.get("summary", "")
             
             items_html += f"""
-            <div class="news-item">
-                <div class="news-title">
-                    <a href="{link}" target="_blank">{title}</a>
+            <div class="news-item" style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px dashed #e5e7eb;">
+                <div class="news-title" style="margin-bottom: 8px;">
+                    <a href="{link}" target="_blank" style="font-family: 'Playfair Display', Georgia, serif; font-size: 18px; font-weight: 700; color: #111827; text-decoration: none; line-height: 1.4;">{title}</a>
                 </div>
-                <div class="news-summary">{summary}</div>
+                <div class="news-summary" style="font-family: 'Inter', Helvetica, Arial, sans-serif; font-size: 14px; color: #4b5563; line-height: 1.6;">{summary}</div>
             </div>
             """
             
         clusters_html += f"""
-        <div class="cluster-card">
-            <h2 class="cluster-title">{cluster.get('name', 'General AI')}</h2>
+        <div class="cluster-card" style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <h2 class="cluster-title" style="font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 700; color: #1f2937; margin-top: 0; margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">{cluster.get('name', 'General AI')}</h2>
             {items_html}
         </div>
         """
@@ -48,12 +48,12 @@ def generate_html_email(summary_data: dict) -> str:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Daily AI News Digest - {today}</title>
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap');
             
             body {{
-                font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                background-color: #0f172a;
-                color: #e2e8f0;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+                background-color: #f9fafb;
+                color: #1f2937;
                 margin: 0;
                 padding: 0;
                 line-height: 1.6;
@@ -70,40 +70,57 @@ def generate_html_email(summary_data: dict) -> str:
                 margin-bottom: 40px;
             }}
             
+            .masthead {{
+                background-color: #fefce8;
+                border: 2px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 24px 20px;
+                margin-bottom: 10px;
+            }}
+            
             .logo-text {{
-                font-size: 28px;
+                font-family: 'Playfair Display', Georgia, serif;
+                font-size: 32px;
                 font-weight: 700;
-                background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
+                color: #111827;
                 margin: 0;
+                letter-spacing: 0.5px;
             }}
             
             .date-subtitle {{
-                font-size: 14px;
-                color: #94a3b8;
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                font-weight: 500;
+                color: #6b7280;
                 text-transform: uppercase;
-                letter-spacing: 2px;
-                margin-top: 5px;
+                letter-spacing: 2.5px;
+                margin-top: 8px;
+            }}
+            
+            .divider {{
+                height: 1px;
+                background-color: #d1d5db;
+                margin: 20px 0;
             }}
             
             .highlights-card {{
-                background: linear-gradient(145deg, #1e1b4b, #111827);
-                border: 1px solid #312e81;
-                border-radius: 16px;
+                background-color: #ffffff;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
                 padding: 24px;
                 margin-bottom: 30px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             }}
             
             .highlights-title {{
-                font-size: 18px;
-                font-weight: 600;
-                color: #818cf8;
+                font-family: 'Playfair Display', Georgia, serif;
+                font-size: 20px;
+                font-weight: 700;
+                color: #1f2937;
                 margin-top: 0;
                 margin-bottom: 15px;
-                display: flex;
-                align-items: center;
+                border-bottom: 1px solid #e5e7eb;
+                padding-bottom: 8px;
             }}
             
             .highlights-card ul {{
@@ -113,69 +130,28 @@ def generate_html_email(summary_data: dict) -> str:
             
             .highlights-card li {{
                 margin-bottom: 12px;
-                color: #cbd5e1;
-            }}
-            
-            .cluster-card {{
-                background-color: #1e293b;
-                border: 1px solid #334155;
-                border-radius: 16px;
-                padding: 24px;
-                margin-bottom: 30px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            }}
-            
-            .cluster-title {{
-                font-size: 20px;
-                font-weight: 600;
-                color: #38bdf8;
-                margin-top: 0;
-                margin-bottom: 20px;
-                border-bottom: 1px solid #334155;
-                padding-bottom: 8px;
-            }}
-            
-            .news-item {{
-                margin-bottom: 20px;
-            }}
-            
-            .news-item:last-child {{
-                margin-bottom: 0;
-            }}
-            
-            .news-title a {{
-                color: #f8fafc;
-                font-size: 16px;
-                font-weight: 600;
-                text-decoration: none;
-                transition: color 0.2s ease;
-            }}
-            
-            .news-title a:hover {{
-                color: #38bdf8;
-            }}
-            
-            .news-summary {{
-                color: #94a3b8;
-                font-size: 14px;
-                margin-top: 6px;
+                color: #4b5563;
+                font-size: 14.5px;
             }}
             
             footer {{
                 text-align: center;
                 margin-top: 50px;
                 padding-top: 20px;
-                border-top: 1px solid #334155;
+                border-top: 1px solid #e5e7eb;
                 font-size: 12px;
-                color: #64748b;
+                color: #6b7280;
             }}
         </style>
     </head>
     <body>
         <div class="container">
             <header>
-                <div class="logo-text">Daily AI News Digest</div>
-                <div class="date-subtitle">{today}</div>
+                <div class="masthead">
+                    <div class="logo-text">DAILY AI NEWS DIGEST</div>
+                    <div class="divider"></div>
+                    <div class="date-subtitle">{today}</div>
+                </div>
             </header>
             
             <div class="highlights-card">
@@ -210,12 +186,10 @@ def send_email(summary_data: dict) -> bool:
     subject = f"Daily AI News Digest - {today}"
     html_body = generate_html_email(summary_data)
     
-    msg = MIMEMultipart("alternative")
+    msg = MIMEText(html_body, "html", "utf-8")
     msg["Subject"] = subject
     msg["From"] = SMTP_USER
     msg["To"] = TO_EMAIL
-    
-    msg.attach(MIMEText(html_body, "html"))
     
     try:
         logger.info(f"Connecting to SMTP server: {SMTP_SERVER}:{SMTP_PORT}...")

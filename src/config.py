@@ -36,14 +36,13 @@ RSS_FEEDS = {
     "The Decoder": "https://the-decoder.com/feed/"
 }
 
+# HTML pages that require scraping (Any news portal can be added here dynamically)
 HTML_SOURCES = {
     "Anthropic News": {
-        "url": "https://www.anthropic.com/news",
-        "type": "anthropic"
+        "url": "https://www.anthropic.com/news"
     },
     "Google DeepMind": {
-        "url": "https://deepmind.google/blog/",
-        "type": "deepmind"
+        "url": "https://deepmind.google/blog/"
     }
 }
 
@@ -60,3 +59,12 @@ NEGATIVE_KEYWORDS = [
     "opinion:", "how to get", "best deals", "gift guide", "sponsored", "podcast episode",
     "newsletter:", "stock price", "stock market", "shares rise", "shares drop", "lawsuit", "sues"
 ]
+
+# Personal Reader Profile / Custom Persona
+# Modify this text to customize how Gemini prioritizes and highlights news for your daily digest
+USER_PERSONA = (
+    "Interested in new open-source LLM weights, advanced agentic architectures, "
+    "local browser-based AI/WebGPU tools, and groundbreaking research papers. "
+    "Would like to know about new AI breakthroughs in Medical field."
+    "Less interested in high-level corporate partnership announcements, stock prices, or general branding marketing events."
+)
